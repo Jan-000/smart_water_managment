@@ -1,0 +1,25 @@
+{
+  "name": "@smart-home/backend",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "main": "dist/server.js",
+  "scripts": {
+    "dev": "tsx watch src/server.ts",
+    "dev:build": "tsc -p tsconfig.json --watch --preserveWatchOutput",
+    "build": "tsc -p tsconfig.json",
+    "start": "node dist/server.js",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "dependencies": {
+    "@fastify/cors": "^9.0.1",
+    "axios": "^1.7.2",
+    "dotenv": "^16.4.5",
+    "fastify": "^4.27.2"
+  },
+  "devDependencies": {
+    "@smart-home/shared": "file:../shared",
+    "@types/node": "^20.12.12",
+    "tsx": "^4.11.0"
+  }
+}
