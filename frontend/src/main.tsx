@@ -244,6 +244,7 @@ function App() {
             value={displayedState.roofWaterLiters}
             suffix=" L"
             capacity={ROOF_CAPACITY_LITERS}
+            tooltip="During dry periods, green roof evaporates water, which cools down the building. Water is taken from roof tank."
             trend={roofStorageTrend}
             animateValue={isApplyingDecision && (activeTransferDecision?.roofToGardenTankLiters ?? 0) > 0}
           />
@@ -252,6 +253,7 @@ function App() {
             value={displayedState.gardenTankLiters}
             suffix=" L"
             capacity={GARDEN_TANK_CAPACITY_LITERS}
+            tooltip="Garden tank can hydrate the garden. It can also store the surplus from the roof"
             trend={gardenTankTrend}
             animateValue={isApplyingDecision && ((activeTransferDecision?.roofToGardenTankLiters ?? 0) > 0 || (activeTransferDecision?.gardenTankToSoilLiters ?? 0) > 0)}
           />
@@ -260,6 +262,7 @@ function App() {
             value={displayedState.gardenSoilHumidityPercent}
             suffix="%"
             capacity={100}
+            tooltip="Soil dries out steadily when it doesn't rain."
             capacitySuffix="%"
             showCapacity={false}
             trend={gardenHumidityTrend}
@@ -572,7 +575,8 @@ function Metric({
   capacitySuffix,
   showCapacity = true,
   trend = "none",
-  animateValue = false
+  animateValue = false,
+  tooltip
 }: {
   label: string;
   value: number;
@@ -582,7 +586,9 @@ function Metric({
   showCapacity?: boolean;
   trend?: MetricTrend;
   animateValue?: boolean;
+  tooltip?: string;
 }) {
+  const tooltipId = React.useId();
   const fillPercent = capacity ? Math.min(100, Math.max(0, (value / capacity) * 100)) : undefined;
   const capacityUnit = capacitySuffix ?? suffix;
   const valueClassName = [
@@ -594,6 +600,8 @@ function Metric({
   return (
     <div
       className="metric"
+      tabIndex={tooltip ? 0 : undefined}
+      aria-describedby={tooltip ? tooltipId : undefined}
       style={fillPercent === undefined ? undefined : ({ "--metric-fill": `${fillPercent}%` } as React.CSSProperties)}
     >
       {fillPercent !== undefined && <span className="metric-level-fill" aria-hidden="true" />}
@@ -614,6 +622,11 @@ function Metric({
           </span>
         )}
       </strong>
+      {tooltip && (
+        <span className="metric-tooltip" id={tooltipId} role="tooltip">
+          {tooltip}
+        </span>
+      )}
     </div>
   );
 }
