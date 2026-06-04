@@ -19,28 +19,71 @@ input {
 }
 
 .app-shell {
+  align-content: start;
   height: 100dvh;
-  overflow: hidden;
+  overflow: auto;
   padding: 16px;
   display: grid;
-  grid-template-rows: auto 1fr auto;
+  grid-template-rows: auto auto auto;
   gap: 12px;
 }
 
 .control-bar {
-  align-items: center;
+  align-items: flex-start;
   background: #ffffff;
   border: 1px solid #cbd5dc;
   border-radius: 8px;
   display: flex;
+  gap: 16px;
   justify-content: space-between;
   padding: 12px 16px;
+}
+
+.heading-block {
+  display: grid;
+  gap: 5px;
+  min-width: 0;
+  max-width: 760px;
+}
+
+.heading-row {
+  align-items: center;
+  display: flex;
+  gap: 7px;
+  min-width: 0;
+}
+
+.heading-toggle {
+  align-items: center;
+  background: transparent;
+  border: 0;
+  border-radius: 6px;
+  color: #1f2933;
+  cursor: pointer;
+  display: inline-flex;
+  gap: 7px;
+  line-height: 1.1;
+  justify-content: center;
+  margin-left: -5px;
+  padding: 1px 5px;
+}
+
+.heading-toggle:hover {
+  background: #eef4f5;
+}
+
+.heading-toggle svg {
+  transition: transform 180ms ease;
+}
+
+.heading-toggle.is-expanded svg {
+  transform: rotate(90deg);
 }
 
 h1 {
   font-size: 23px;
   line-height: 1.1;
-  margin: 0 0 5px;
+  margin: 0;
 }
 
 p {
@@ -48,15 +91,22 @@ p {
 }
 
 .control-bar p,
+.intro-copy,
 .decision-block p,
 .forecast-card small,
 .timeline-header span {
   color: #53616b;
 }
 
+.intro-copy {
+  line-height: 1.35;
+}
+
 .actions {
   display: flex;
+  flex: 0 0 auto;
   gap: 10px;
+  padding-top: 1px;
 }
 
 .icon-button {
@@ -70,6 +120,7 @@ p {
   gap: 8px;
   min-height: 40px;
   padding: 0 14px;
+  white-space: nowrap;
 }
 
 .icon-button:disabled {
@@ -78,10 +129,10 @@ p {
 }
 
 .dashboard {
+  align-items: start;
   display: grid;
   gap: 12px;
   grid-template-columns: minmax(0, 1fr) 340px;
-  height: 100%;
   min-height: 0;
 }
 
@@ -89,9 +140,12 @@ p {
   background: #ffffff;
   border: 1px solid #cbd5dc;
   border-radius: 8px;
-  height: 100%;
+  align-self: end;
+  aspect-ratio: 720 / 480;
   min-height: 0;
   overflow: hidden;
+  width: 100%;
+  height: 100%;
 }
 
 .house-stage svg {
@@ -101,10 +155,10 @@ p {
 }
 
 .metrics-panel {
-  align-content: start;
-  display: grid;
+  align-self: stretch;
+  display: flex;
+  flex-direction: column;
   gap: 10px;
-  grid-template-rows: repeat(3, minmax(78px, auto)) minmax(0, 1fr);
   height: 100%;
   min-height: 0;
 }
@@ -121,6 +175,7 @@ p {
 .metric {
   display: grid;
   gap: 4px;
+  min-height: 78px;
   padding: 12px 14px;
   position: relative;
   overflow: visible;
@@ -210,23 +265,18 @@ p {
 
 .decision-block {
   display: grid;
-  gap: 8px;
-  min-height: 0;
-  overflow: hidden;
-  padding: 12px 14px;
+  gap: 6px;
+  margin-top: auto;
+  padding: 10px 14px;
 }
 
 .decision-block strong {
-  font-size: 18px;
+  font-size: 16px;
   line-height: 1.2;
 }
 
 .decision-block p {
-  display: -webkit-box;
   line-height: 1.35;
-  overflow: hidden;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 4;
 }
 
 .timeline-band {
@@ -265,6 +315,17 @@ p {
 input[type="range"] {
   accent-color: #2a6f97;
   width: 100%;
+}
+
+.timeline-track-wrap {
+  display: grid;
+  min-height: 20px;
+  place-items: center stretch;
+  position: relative;
+}
+
+.timeline-track-wrap input {
+  grid-area: 1 / 1;
 }
 
 .forecast-strip {
@@ -310,6 +371,28 @@ input[type="range"] {
 
 .forecast-card small.is-empty {
   visibility: hidden;
+}
+
+.timeline-loading-state {
+  align-items: center;
+  color: #53616b;
+  display: flex;
+  flex-direction: column;
+  font-size: 13px;
+  font-weight: 700;
+  gap: 10px;
+  justify-content: center;
+  min-height: 72px;
+  text-transform: uppercase;
+}
+
+.timeline-spinner {
+  animation: decision-spin 850ms linear infinite;
+  border: 4px solid #c8d7db;
+  border-radius: 999px;
+  border-top-color: #2a6f97;
+  height: 36px;
+  width: 36px;
 }
 
 .rain-drops path {

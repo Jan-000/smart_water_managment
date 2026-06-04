@@ -1,6 +1,6 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
-import { Brain, CloudRain } from "lucide-react";
+import { ChevronRight, CloudRain, Droplet } from "lucide-react";
 import type {
   ApiForecastResponse,
   ApiManageWaterResponse,
@@ -35,7 +35,7 @@ function apiUrl(path: string) {
 
 function App() {
   const [forecast, setForecast] = React.useState<RainForecastHour[]>([]);
-  const [simulationStart, setSimulationStart] = React.useState<Date>(new Date());
+  const [isForecastLoading, setIsForecastLoading] = React.useState(true);
   const [realStartMs, setRealStartMs] = React.useState(Date.now());
   const [baseElapsedMs, setBaseElapsedMs] = React.useState(0);
   const [nowMs, setNowMs] = React.useState(Date.now());
@@ -48,14 +48,13 @@ function App() {
   const [isManaging, setIsManaging] = React.useState(false);
   const [isApplyingDecision, setIsApplyingDecision] = React.useState(false);
   const [activeTransferDecision, setActiveTransferDecision] = React.useState<WaterManagementDecision | undefined>();
+  const [isIntroExpanded, setIsIntroExpanded] = React.useState(false);
   const hasStartedForecastLoad = React.useRef(false);
 
   const maxHourIndex = Math.max(0, forecast.length - 1);
   const liveElapsedMs = isSimulationPaused ? baseElapsedMs : getElapsedMs(nowMs);
   const liveHourIndex = Math.min(maxHourIndex, Math.max(0, Math.floor(liveElapsedMs / HOUR_MS)));
   const displayHourIndex = liveHourIndex;
-  const displayElapsedMs = liveElapsedMs;
-  const clock = new Date(simulationStart.getTime() + displayElapsedMs);
   const displayedState = React.useMemo(
     () => simulateState(forecast, displayHourIndex, decisionEvents),
     [forecast, displayHourIndex, decisionEvents]
@@ -66,6 +65,7 @@ function App() {
   const gardenHumidityTrend = useMetricTrend(displayedState.gardenSoilHumidityPercent);
 
   async function initializeForecast() {
+    setIsForecastLoading(true);
     setForecastError(undefined);
     try {
       await wait(WEATHER_FETCH_DELAY_MS);
@@ -80,7 +80,6 @@ function App() {
       }
 
       setForecast(data.forecast);
-      setSimulationStart(new Date(data.forecast[0]?.time ?? Date.now()));
       setDecisionEvents([]);
       setLastDecision(undefined);
       setLastDecisionAt(undefined);
@@ -90,6 +89,8 @@ function App() {
     } catch (error) {
       setForecast([]);
       setForecastError(error instanceof Error ? error.message : "Could not load rainfall forecast.");
+    } finally {
+      setIsForecastLoading(false);
     }
   }
 
@@ -186,9 +187,32 @@ function App() {
   return (
     <main className="app-shell">
       <section className="control-bar">
-        <div>
-          <h1>Smart Roof Water</h1>
-          <p>{forecastError ? "Forecast unavailable" : formatClock(clock)}</p>
+        <div className="heading-block">
+          <div className="heading-row">
+            <h1>
+              <button
+                className={`heading-toggle${isIntroExpanded ? " is-expanded" : ""}`}
+                type="button"
+                onClick={() => setIsIntroExpanded((isExpanded) => !isExpanded)}
+                aria-expanded={isIntroExpanded}
+                aria-controls="intro-copy"
+                title={isIntroExpanded ? "Hide details" : "Show details"}
+              >
+                <ChevronRight size={19} aria-hidden="true" />
+                <span>Smart Roof Water</span>
+              </button>
+            </h1>
+          </div>
+          {isIntroExpanded && (
+            <p id="intro-copy" className="intro-copy">
+              This is a rainwater manager for a house with a garden.<br />
+              Manager waters the garden and decides about tank storage - depending on the weather.<br />
+              Principles: <ul>
+                <li>Greenroof needs water to cool the building</li>
+                <li>Garden is supposed to be maintained above 40% soil humidity</li>
+              </ul>
+            </p>
+          )}
         </div>
         <div className="actions">
           <button
@@ -197,7 +221,7 @@ function App() {
             disabled={isManaging || isApplyingDecision || forecast.length === 0}
             title="Ask AI to manage water"
           >
-            <Brain size={18} />
+            <Droplet size={18} />
             <span>{isManaging ? "Thinking" : isApplyingDecision ? "Applying" : "Manage water"}</span>
           </button>
         </div>
@@ -265,31 +289,44 @@ function App() {
       <section className="timeline-band">
         <div className="timeline-header">
           <label htmlFor="timeline">Simulation time</label>
-          <span>{isSimulationPaused ? "Paused" : "Live"} · hour {displayHourIndex + 1} / {Math.max(forecast.length, 1)}</span>
+          <span>
+            {isForecastLoading
+              ? "Awaiting forecast"
+              : `${isSimulationPaused ? "Paused" : "Live"} · hour ${displayHourIndex + 1} / ${Math.max(forecast.length, 1)}`}
+          </span>
         </div>
-        <input
-          id="timeline"
-          type="range"
-          min={0}
-          max={maxHourIndex}
-          value={displayHourIndex}
-          disabled
-          readOnly
-        />
-        <div className="forecast-strip">
-          {summarizeForecastByDay(forecast).map((day) => (
-            <div className="forecast-card" key={day.date}>
-              <span className="forecast-card-header">
-                <span>{new Date(day.date).toLocaleDateString(undefined, { weekday: "short" })}</span>
-                {day.rainMm > 0 && <CloudRain size={16} aria-label="Rain expected" />}
-              </span>
-              <strong>{day.rainMm.toFixed(1)} mm</strong>
-              <small className={day.rainMm > 0 ? undefined : "is-empty"} aria-hidden={day.rainMm > 0 ? undefined : true}>
-                {day.rainMm > 0 ? `+${Math.round(day.collectedLiters)} L expected on the roof` : "No rain expected"}
-              </small>
-            </div>
-          ))}
+        <div className="timeline-track-wrap">
+          <input
+            id="timeline"
+            type="range"
+            min={0}
+            max={maxHourIndex}
+            value={displayHourIndex}
+            disabled
+            readOnly
+          />
         </div>
+        {isForecastLoading ? (
+          <div className="timeline-loading-state" role="status" aria-live="polite">
+            <span className="timeline-spinner" aria-hidden="true" />
+            <span>awaiting weather forecast</span>
+          </div>
+        ) : (
+          <div className="forecast-strip">
+            {summarizeForecastByDay(forecast).map((day) => (
+              <div className="forecast-card" key={day.date}>
+                <span className="forecast-card-header">
+                  <span>{new Date(day.date).toLocaleDateString(undefined, { weekday: "short" })}</span>
+                  {day.rainMm > 0 && <CloudRain size={16} aria-label="Rain expected" />}
+                </span>
+                <strong>{day.rainMm.toFixed(1)} mm</strong>
+                <small className={day.rainMm > 0 ? undefined : "is-empty"} aria-hidden={day.rainMm > 0 ? undefined : true}>
+                  {day.rainMm > 0 ? `+${Math.round(day.collectedLiters)} L expected on the roof` : "No rain expected"}
+                </small>
+              </div>
+            ))}
+          </div>
+        )}
       </section>
     </main>
   );
@@ -620,16 +657,6 @@ function summarizeForecast(forecast: RainForecastHour[]) {
     }),
     { hours: 0, rainMm: 0, collectedLiters: 0 }
   );
-}
-
-function formatClock(date: Date) {
-  return date.toLocaleString(undefined, {
-    weekday: "short",
-    hour: "2-digit",
-    minute: "2-digit",
-    day: "2-digit",
-    month: "short"
-  });
 }
 
 function formatDecisionTimestamp(value: string) {
