@@ -206,11 +206,13 @@ function App() {
           {isIntroExpanded && (
             <p id="intro-copy" className="intro-copy">
               This is a rainwater manager for a house with a garden.<br />
-              Manager waters the garden and decides about tank storage - depending on the weather.<br />
-              Principles: <ul>
-                <li>Greenroof needs water to cool the building</li>
-                <li>Garden is supposed to be maintained above 40% soil humidity</li>
-              </ul>
+              Depending on the weather, it distributes water between greenroof, garden tank and the garden itself.<br />
+              <p className="principles">
+                Principles: <ul>
+                  <li>Greenroof needs water to cool the building</li>
+                  <li>Garden is supposed to be maintained above 40% soil humidity</li>
+                </ul>
+              </p>
             </p>
           )}
         </div>
