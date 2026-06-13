@@ -29,7 +29,7 @@ input {
 }
 
 .control-bar {
-  align-items: flex-start;
+  align-items: center;
   background: #ffffff;
   border: 1px solid #cbd5dc;
   border-radius: 8px;
@@ -116,12 +116,12 @@ p {
   display: flex;
   flex: 0 0 auto;
   gap: 10px;
-  padding-top: 1px;
+  align-self: flex-start;
 }
 
 .icon-button {
   align-items: center;
-  background: #1f2933;
+  background: #0080ff;
   border: 0;
   border-radius: 8px;
   color: #ffffff;

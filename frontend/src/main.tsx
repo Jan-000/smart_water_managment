@@ -199,7 +199,7 @@ function App() {
                 title={isIntroExpanded ? "Hide details" : "Show details"}
               >
                 <ChevronRight size={19} aria-hidden="true" />
-                <span>Smart Roof Water</span>
+                <span>Rain Water Manager</span>
               </button>
             </h1>
           </div>
