@@ -214,7 +214,7 @@ p {
   align-items: baseline;
   display: grid;
   font-size: 24px;
-  grid-template-columns: 118px auto;
+  grid-template-columns: 95px auto;
   line-height: 1.1;
   position: relative;
   z-index: 1;
